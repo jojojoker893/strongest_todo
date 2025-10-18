@@ -50,6 +50,15 @@ RSpec.describe User do
       end
     end
     
+    context "passwordが短い場合" do
+      let(:user) {build(:user, password: "1234")}
+      it "保存されないこと" do
+        user.valid?
+        expect(user.errors[:password]).to  include("is too short (minimum is 6 characters)")
+      end
+      
+    end
+    
     
 
 
