@@ -34,7 +34,12 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def update
-    
+    user = current_user
+    if user.update(user_params)
+      render json: { message: "ユーザー情報を更新しました", user: {name: user.name, email: user.email, password: user.password}}, status: 200
+    else
+      render json: { message: "ユーザー情報の更新に失敗しました"}, status: 422
+    end
   end
 
   private
