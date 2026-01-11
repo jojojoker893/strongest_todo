@@ -1,22 +1,12 @@
 class Api::V1::UsersController < ApplicationController
-  skip_before_action :authorize_request, only: [:create]
-
-  def index
-    users = User.all
-
-    if users.empty?
-      render status: 400
-    else
-      render json: {users: users}, status: 200
-    end
-  end
+  before_action :authenticate, only: %i[update show destroy]
 
   def create
     user = User.new(user_params)
     if user.save
       render json: { message: "ユーザー登録が完了しました",user: {name: user.name, email: user.email}}, status: 201
     else
-      render json: { message: user.error.full_message }, status: 422
+      render json: { message: user.errors.full_messages }, status: 422
     end
   end
 
