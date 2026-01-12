@@ -1,34 +1,34 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate, only: %i[update show destroy]
+  before_action :authenticate_user, only: %i[update destroy index]
+
+  def index
+    render json: current_user.as_json(except: :password_digest)
+  end
 
   def create
     user = User.new(user_params)
     if user.save
-      render json: { message: "ユーザー登録が完了しました",user: {name: user.name, email: user.email}}, status: 201
+      render json: { message: "Created", user: { name: user.name, email: user.email } }, status: :created
     else
-      render json: { message: user.errors.full_messages }, status: 422
+      render json: { message: user.errors.full_messages }, status: :unprocessable_content
     end
   end
 
   def destroy
     user = current_user
     if user && user.destroy
-      render json: { message: "アカウントが削除されました" }, status: 200
+      render json: { message: "Deleted" }, status: :ok
     else
-      render json: { message: "アカウントの削除に失敗しました"}, status: 422
+      render json: { message: user.errors.full_messages }, status: :unprocessable_content
     end
-  end
-
-  def show
-    render json: { id: @current_user.id, name: @current_user.name, email: @current_user.email }, status: 200
   end
 
   def update
     user = current_user
     if user.update(user_params)
-      render json: { message: "ユーザー情報を更新しました", user: {name: user.name, email: user.email, password: user.password}}, status: 200
+      render json: { message: "Updated", user: { name: user.name, email: user.email, password: user.password } }, status: :ok
     else
-      render json: { message: "ユーザー情報の更新に失敗しました"}, status: 422
+      render json: { message: user.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -37,5 +37,4 @@ class Api::V1::UsersController < ApplicationController
   def user_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end
-
 end
