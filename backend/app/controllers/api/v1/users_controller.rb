@@ -1,5 +1,9 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate, only: %i[update show destroy]
+  before_action :authenticate_user, only: %i[update destroy index]
+
+  def index
+    render json: current_user.as_json(except: :password_digest)
+  end
 
   def create
     user = User.new(user_params)
@@ -17,10 +21,6 @@ class Api::V1::UsersController < ApplicationController
     else
       render json: { message: "アカウントの削除に失敗しました"}, status: 422
     end
-  end
-
-  def show
-    render json: { id: @current_user.id, name: @current_user.name, email: @current_user.email }, status: 200
   end
 
   def update
