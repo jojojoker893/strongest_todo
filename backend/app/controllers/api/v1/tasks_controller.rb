@@ -3,7 +3,7 @@ class Api::V1::TasksController < ApplicationController
     tasks = @current_user.tasks
 
     if tasks.empty?
-      render json: { message: "タスクがありません"}, status: 400
+      render json: { message: "タスクがありません" }, status: 400
     else
       render json: { tasks: tasks }, status: 200
     end
@@ -15,12 +15,12 @@ class Api::V1::TasksController < ApplicationController
     if task.save
       render json: { message: "タスクを登録しました" }, status: 200
     else
-      render json: { message: "タスクの登録に失敗しました"}, status: 422
+      render json: { message: "タスクの登録に失敗しました" }, status: 422
     end
   end
 
   def destory
-    task = current_user.tasks.find_by(id: params[:id] )
+    task = current_user.tasks.find_by(id: params[:id])
 
     if task.nil?
       render json: { message: "タスクがありません" }, status: 404

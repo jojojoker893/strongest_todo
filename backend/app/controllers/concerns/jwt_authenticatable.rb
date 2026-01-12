@@ -25,14 +25,13 @@ module JwtAuthenticatable
   private
 
   def create_token(user_id)
-    payload = {user_id: user_id, exp: 24.hours.from_now.to_i}
+    payload = { user_id: user_id, exp: 24.hours.from_now.to_i }
     secret_key = Rails.application.credentials.secret_key_base
     token = JWT.encode(payload, secret_key)
-    return token
+    token
   end
 
   def render_unauthorized
-    render json: {error: "unauthorized"}, status: :unauthorized
+    render json: { error: "unauthorized" }, status: :unauthorized
   end
-
 end

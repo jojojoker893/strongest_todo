@@ -18,6 +18,6 @@ module Api
     config.autoload_lib(ignore: %w[assets tasks])
     config.api_only = true
     config.i18n.default_locale = :ja
-    config.i18n.available_locales = [:en, :ja] 
+    config.i18n.available_locales = [ :en, :ja ]
   end
 end

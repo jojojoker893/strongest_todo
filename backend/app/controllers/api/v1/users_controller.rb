@@ -8,9 +8,9 @@ class Api::V1::UsersController < ApplicationController
   def create
     user = User.new(user_params)
     if user.save
-      render json: { message: "Created",user: {name: user.name, email: user.email}}, status: :created
+      render json: { message: "Created", user: { name: user.name, email: user.email } }, status: :created
     else
-      render json: { message: user.errors.full_messages }, status: :unprocessable_entity
+      render json: { message: user.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -19,16 +19,16 @@ class Api::V1::UsersController < ApplicationController
     if user && user.destroy
       render json: { message: "Deleted" }, status: :ok
     else
-      render json: { message: user.errors.full_messages}, status: :unprocessable_entity
+      render json: { message: user.errors.full_messages }, status: :unprocessable_content
     end
   end
 
   def update
     user = current_user
     if user.update(user_params)
-      render json: { message: "Updated", user: {name: user.name, email: user.email, password: user.password}}, status: :ok
+      render json: { message: "Updated", user: { name: user.name, email: user.email, password: user.password } }, status: :ok
     else
-      render json: { message: user.errors.full_messages}, status: :unprocessable_entity
+      render json: { message: user.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -37,5 +37,4 @@ class Api::V1::UsersController < ApplicationController
   def user_params
     params.require(:user).permit(:name, :email, :password, :password_confirmation)
   end
-
 end
