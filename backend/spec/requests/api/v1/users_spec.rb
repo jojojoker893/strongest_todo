@@ -1,18 +1,11 @@
 require 'rails_helper'
 RSpec.describe 'Api::V1::Users', type: :request do
   let (:user) { FactoryBot.create(:user) }
-
-  let(:token) do
-    payload = { user_id: user.id, exp: 24.hours.from_now.to_i }
-    secret_key = Rails.application.credentials.secret_key_base
-    JWT.encode(payload, secret_key)
-  end
-
-  let(:headers) { { "Authorization" => "Bearer #{token}" } }
+  let(:headers) { authorization_header(user) }
 
   describe "GET /api/v1/users" do
-    context "when logged in" do
-      it "returns current_user with status ok" do
+    context "ログイン済みの場合" do
+      it "現在のユーザーを返すこと" do
         get "/api/v1/users", headers: headers
         expect(response).to have_http_status(:ok)
 
@@ -23,8 +16,8 @@ RSpec.describe 'Api::V1::Users', type: :request do
       end
     end
 
-    context "when not logged in" do
-      it "returns unauthorized" do
+    context "ログインしていない場合" do
+      it "unauthorizedが返ること" do
         get "/api/v1/users"
         expect(response).to have_http_status(:unauthorized)
       end
@@ -33,10 +26,10 @@ RSpec.describe 'Api::V1::Users', type: :request do
 
   describe "POST /api/v1/users" do
     let(:valid_params) { { user: FactoryBot.attributes_for(:user) } }
-    let(:invalid_params) { { user: FactoryBot.attributes_for(:user).merge(name: "") } }
+    let(:invalid_params) { { user: FactoryBot.attributes_for(:user, :invalid_user) } }
 
-    context "for valid params" do
-      it "user created and the returns status ok" do
+    context "有効なパラメータである場合" do
+      it "ユーザーが作成できること" do
         expect {
           post "/api/v1/users", params: valid_params
         }.to change(User, :count).by(1)
@@ -45,8 +38,8 @@ RSpec.describe 'Api::V1::Users', type: :request do
       end
     end
 
-    context "for invalid params" do
-      it "no user was created and the returns status unprocessable_entity" do
+    context "無効なパラメータの場合" do
+      it "ユーザーが作成できないこと" do
         expect {
           post "/api/v1/users", params: invalid_params
         } .not_to change(User, :count)
@@ -59,8 +52,8 @@ RSpec.describe 'Api::V1::Users', type: :request do
   describe "DELETE /api/v1/users" do
     let!(:user) { FactoryBot.create(:user) }
 
-    context "when logged in" do
-      it "deletes the user and returns status ok" do
+    context "ログインしている場合" do
+      it "自身のアカウントを削除できること" do
         expect {
           delete "/api/v1/users/#{user.id}", headers: headers
       }.to change(User, :count).by(-1)
@@ -72,8 +65,8 @@ RSpec.describe 'Api::V1::Users', type: :request do
       end
     end
 
-    context "when not logged in" do
-      it "does not deleted and returns unauthorized" do
+    context "ログインしていない場合" do
+      it "アカウントを削除できないこと" do
         expect {
           delete "/api/v1/users/#{user.id}"
       }.not_to change(User, :count)
@@ -82,14 +75,14 @@ RSpec.describe 'Api::V1::Users', type: :request do
       end
     end
 
-    context "deletion failed" do
+    context "削除に失敗した場合" do
       before do
         allow_any_instance_of(User).to receive(:destroy) do |user_instance|
           user_instance.errors.add(:base, "削除に失敗しました")
           false
         end
       end
-      it "does not deleted and returns unauthorized_entity" do
+      it "ユーザーが削除できないこと" do
         expect {
           delete "/api/v1/users/#{user.id}", headers: headers
         }.not_to change(User, :count)
@@ -103,30 +96,29 @@ RSpec.describe 'Api::V1::Users', type: :request do
   end
 
   describe "PUT /api/v1/users" do
-    let(:update_params) { { user: { name: "Updated Name" } } }
-    let(:invalid_params) { { user: { email: "mail" } } }
+    let(:update_params) { FactoryBot.attributes_for(:user, :update_user) }
+    let(:invalid_params) { FactoryBot.attributes_for(:user, :invalid_user) }
 
-    context "when logged in" do
-      it "正しいparams" do
-        put "/api/v1/users/#{user.id}", params: update_params, headers: headers
-
+    context "ログインしていて正しいパラメータの場合" do
+      it "ユーザーが更新できること" do
+        put "/api/v1/users/#{user.id}", params: { user: update_params }, headers: headers
         expect(response).to have_http_status(:ok)
 
-        expect(user.reload.name).to eq("Updated Name")
+        expect(user.reload.name).to eq("update_name")
       end
     end
 
-    context "when not logged in" do
-      it "failed to update and returned unauthorized" do
-        put "/api/v1/users/#{user.id}", params: update_params
+    context "ログインしていない場合" do
+      it "更新に失敗すること" do
+        put "/api/v1/users/#{user.id}", params: { user: update_params }
 
         expect(response).to have_http_status(:unauthorized)
       end
     end
 
-    context "invalid parameter" do
-      it "failed to update and returned unprocessable_content" do
-        put "/api/v1/users/#{user.id}", params: invalid_params, headers: headers
+    context "不正なパラメータの場合" do
+      it "更新に失敗すること" do
+        put "/api/v1/users/#{user.id}", params: { user: invalid_params }, headers: headers
         puts JSON.parse(response.body)
         expect(response).to have_http_status(:unprocessable_content)
       end
