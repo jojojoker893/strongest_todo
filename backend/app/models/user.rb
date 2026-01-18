@@ -1,6 +1,5 @@
 class User < ApplicationRecord
   has_many :task, dependent: :destroy
-  has_many :completed_tasks, dependent: :destroy
 
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
