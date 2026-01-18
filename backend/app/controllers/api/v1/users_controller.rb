@@ -1,9 +1,5 @@
 class Api::V1::UsersController < ApplicationController
-  before_action :authenticate_user, only: %i[update destroy index]
-
-  def index
-    render json: current_user.as_json(except: :password_digest)
-  end
+  before_action :authenticate_user!, only: %i[update destroy]
 
   def create
     user = User.new(user_params)
