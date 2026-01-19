@@ -84,7 +84,6 @@ RSpec.describe 'Api::V1::Users', type: :request do
       let(:headers) {{ "Authorization" => "Bearer #{token}" }}
       it "更新に失敗すること" do
         put "/api/v1/users/#{user.id}", params: { user: invalid_params }, headers: headers
-        puts JSON.parse(response.body)
         expect(response).to have_http_status(:unprocessable_content)
       end
     end
