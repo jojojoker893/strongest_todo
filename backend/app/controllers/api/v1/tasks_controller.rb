@@ -1,30 +1,26 @@
 class Api::V1::TasksController < ApplicationController
-  def index
-    tasks = @current_user.tasks
+  before_action :authenticate_user!
+  before_action :set_task, only: [:update, :destroy]
 
-    if tasks.empty?
-      render json: { message: "タスクがありません" }, status: 400
-    else
-      render json: { tasks: tasks }, status: 200
-    end
+  def index
+    tasks = current_user.tasks
+    render json: { tasks: tasks }, status: :ok
   end
 
   def create
-    task = Task.new(task_params)
+    task = current_user.tasks.build(task_params)
 
     if task.save
-      render json: { message: "タスクを登録しました" }, status: 200
+      render json: { message: "タスクを登録しました", task: task }, status: :created
     else
-      render json: { message: "タスクの登録に失敗しました" }, status: 422
+      render json: { message: "タスクの登録に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
-  def destory
+  def destroy
     task = current_user.tasks.find_by(id: params[:id])
 
-    if task.nil?
-      render json: { message: "タスクがありません" }, status: 404
-    elsif task.destory
+    if task.destroy
       render json: { message: "タスクを削除しました" }, status: 200
     else
       render json: { message: "タスクの削除に失敗しました" }, status: 422
@@ -32,26 +28,22 @@ class Api::V1::TasksController < ApplicationController
   end
 
   def update
+    task = Task.find_by(id: params[:id])
+
     if task.update(task_params)
-      render json: { message: "タスクを更新しました" }, status: 200
+      render json: { message: "タスクを更新しました" }, status: :ok
     else
-      render json: { message: "タスクの更新に失敗しまsた" }, status: 422
-    end
-  end
-
-  def show
-    task = @cureent_user.tasks.find_by(id: task_params[:id])
-
-    if task
-      render json: task, status: 200
-    else
-      render json: { message: "タスクがありません" }, status: 404
+      render json: { message: "タスクの更新に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_content
     end
   end
 
   private
 
+  def set_task
+    render json: { message: "タスクがありません" }, status: :not_found if task.nil?
+  end
+
   def task_params
-    params.require(:task).permit(:name, :description, :category, :user_id, :created_at)
+    params.require(:task).permit(:title, :description, :category, :status, :visibility)
   end
 end
