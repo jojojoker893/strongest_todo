@@ -67,8 +67,32 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       expect(response).to have_http_status(:unauthorized)  
       end
     end
-    
   end
+
+  describe "DELETE /api/v1/tasks" do
+    let!(:task) { FactoryBot.create(:task, user: user) }
+    let!(:other_task) { FactoryBot.create(:task, :other_task, user: other_user) }
+    context "自身のタスクを指定した場合" do
+      it "削除できること" do
+        expect{
+          delete "/api/v1/tasks/#{task.id}", headers: headers
+      }.to change(Task, :count).by(-1)
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["message"]).to eq("タスクを削除しました")   
+      end
+    end
+    
+    context "自身以外のタスクを指定した場合" do
+      it "削除できないこと" do
+        expect{
+          delete "/api/v1/tasks/#{other_task.id}", headers: headers
+        }.not_to change(Task, :count)
+      end
+    end
+  end
+  
   
 end
 
