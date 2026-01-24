@@ -13,7 +13,7 @@ class Api::V1::TasksController < ApplicationController
     if task.save
       render json: { message: "タスクを登録しました", task: task }, status: :created
     else
-      render json: { message: "タスクの登録に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_entity
+      render json: { message: "タスクの登録に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -21,7 +21,7 @@ class Api::V1::TasksController < ApplicationController
     if @task.destroy
       render json: { message: "タスクを削除しました" }, status: :ok
     else
-      render json: { message: "タスクの削除に失敗しました" }, status: 422
+      render json: { message: "タスクの削除に失敗しました" }, status: :unprocessable_content
     end
   end
 
@@ -29,7 +29,7 @@ class Api::V1::TasksController < ApplicationController
     if @task.update(task_params)
       render json: { message: "タスクを更新しました" }, status: :ok
     else
-      render json: { message: "タスクの更新に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_content
+      render json: { message: "タスクの更新に失敗しました", errors: @task.errors.full_messages }, status: :unprocessable_content
     end
   end
 

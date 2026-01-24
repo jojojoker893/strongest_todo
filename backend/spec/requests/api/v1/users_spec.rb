@@ -54,7 +54,7 @@ RSpec.describe 'Api::V1::Users', type: :request do
     end
   end
 
-  describe "PATCH /api/v1/users" do
+  describe "PUT /api/v1/users" do
     let!(:user) { FactoryBot.create(:user) }
 
     context "認証していて正しいパラメータの場合" do

@@ -5,6 +5,7 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
   let(:other_user) { FactoryBot.create(:user, :other_user) }
   let(:token) { JwtToken.call(user) }
   let(:headers) {{ "Authorization" => "Bearer #{token}" }}
+
   describe  "GET /api/v1/tasks" do
     let!(:task) { FactoryBot.create(:task, user: user) }
     let!(:other_task) { FactoryBot.create(:task, :other_task, user: other_user) }
@@ -92,9 +93,25 @@ RSpec.describe 'Api::V1::Tasks', type: :request do
       end
     end
   end
-  
-  
+
+  describe "PUT /api/v1/tasks" do
+    let!(:task) { FactoryBot.create(:task, user: user) }
+
+    context "正常なパラメータの場合" do
+      let(:params) { { task: { title: "updatetitle"} } }
+      it "更新できること" do
+          put "/api/v1/tasks/#{task.id}", params: params, headers: headers 
+          expect(response).to have_http_status(:ok)
+          expect(task.reload.title).to eq "updatetitle"  
+      end
+    end
+
+    context "不正なパラメータの場合" do
+      let(:invalid_params) { { task: { title: "" } } }
+      it "更新に失敗すること" do
+        put "/api/v1/tasks/#{task.id}", params: invalid_params, headers: headers
+        expect(response).to have_http_status(:unprocessable_content)  
+      end
+    end
+  end
 end
-
-
-
