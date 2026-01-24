@@ -13,34 +13,34 @@ class Api::V1::TasksController < ApplicationController
     if task.save
       render json: { message: "タスクを登録しました", task: task }, status: :created
     else
-      render json: { message: "タスクの登録に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_entity
+      render json: { message: "タスクの登録に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_content
     end
   end
 
   def destroy
-    task = current_user.tasks.find_by(id: params[:id])
-
-    if task.destroy
-      render json: { message: "タスクを削除しました" }, status: 200
+    if @task.destroy
+      render json: { message: "タスクを削除しました" }, status: :ok
     else
-      render json: { message: "タスクの削除に失敗しました" }, status: 422
+      render json: { message: "タスクの削除に失敗しました" }, status: :unprocessable_content
     end
   end
 
   def update
-    task = Task.find_by(id: params[:id])
-
-    if task.update(task_params)
+    if @task.update(task_params)
       render json: { message: "タスクを更新しました" }, status: :ok
     else
-      render json: { message: "タスクの更新に失敗しました", errors: task.errors.full_messages }, status: :unprocessable_content
+      render json: { message: "タスクの更新に失敗しました", errors: @task.errors.full_messages }, status: :unprocessable_content
     end
   end
 
   private
 
   def set_task
-    render json: { message: "タスクがありません" }, status: :not_found if task.nil?
+    @task = current_user.tasks.find_by(id: params[:id])
+
+    if @task.nil?
+      render json: { message: "タスクがありません" }, status: :not_found
+    end
   end
 
   def task_params
