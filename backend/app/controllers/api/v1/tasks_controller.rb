@@ -3,8 +3,17 @@ class Api::V1::TasksController < ApplicationController
   before_action :set_task, only: [:update, :destroy]
 
   def index
-    tasks = current_user.tasks
-    render json: { tasks: tasks }, status: :ok
+    @tasks = Task.order(created_at: :desc).page(params[:page]).per(10)
+
+    pagination = {
+      current: @tasks.current_page,
+      next: @tasks.next_page,
+      prev: @tasks.prev_page,
+      total_pages: @tasks.total_pages,
+      count_pages: @tasks.total_count
+    }
+
+    render json: { tasks: @tasks, meta: pagination }, status: :ok
   end
 
   def create
