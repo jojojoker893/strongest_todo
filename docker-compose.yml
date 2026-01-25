@@ -23,7 +23,19 @@ services:
       - db
     tty: true
     stdin_open: true
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - ./frontend:/front
+      - ./front/node_modules
+    ports:
+      - 3001:3001
+    depends_on:
+      - backend
+    tty: true
+    stdin_open: true
   
 volumes:
   mysql_data:
-
